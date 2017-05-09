@@ -1,0 +1,7 @@
+--compilers es6:babel-core/register
+--colors
+--reporter spec
+--timeout 5000
+--check-leaks
+--recursive
+--sort
