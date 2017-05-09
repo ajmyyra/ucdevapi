@@ -6,7 +6,9 @@ If you find anything not working the same way as the actual API does, please rep
 
 ## Current status
 
-Currently a basic CRUD setup is available for servers, storages and IP addresses. The plan is to support the whole API (firewall, backups, subaccounts etc), but as my time is limited, we're not getting there anytime soon. If you need a specific feature of the API, create an issue and I'll try to prioritise it.
+This repository is in current development and features are added. Currently nothing works.
+
+Current goal is a basic CRUD setup for servers, storages and IP addresses. Long-term plan is to support the whole API (firewall, backups, subaccounts etc), but as my time is limited, we're not getting there anytime soon. If you need a specific feature of the API, create an issue and I'll try to prioritise it.
 
 ## Is this running somewhere so I can play with it?
 
