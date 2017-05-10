@@ -12,7 +12,7 @@ Current goal is a basic CRUD setup for servers, storages and IP addresses. Long-
 
 ## Is this running somewhere so I can play with it?
 
-I'm running the dev API under https://ucdevapi.myyrae.fi with UpCloud API version 1.2.3. Feel free to use it. Documentation can be found at https://www.upcloud.com/api/1.2.3/ .
+Once somewhat working, I'll be running the dev API under https://ucdevapi.myyrae.fi with UpCloud API version 1.2.3. Feel free to use it. Documentation can be found at https://www.upcloud.com/api/1.2.3/ .
 
 ## HOWTO
 

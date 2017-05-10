@@ -16,11 +16,11 @@ export function startServer() {
     const userpwd = newuser.generateHash(req.params.password);
     newuser.password = userpwd;
 
-    models.user.findAll({ // TODO promisify to make it shiny and nice.
+    models.user.findAll({ // TODO promisify correctly to make it shiny and nice.
       where: { username: req.params.username },
       logging: log.debug.bind(log) })
-      .then( (user) => { // TODO why user exists when it doesn't
-        if (!user) {
+      .then( (user) => {
+        if (!user || user.length < 1) {
           newuser.save()
           .then ( (createduser) => {
             res.statusCode = 201;
