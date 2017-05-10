@@ -10,11 +10,12 @@ var User = sequelize.define('user', {
     },
     username: {
         type: DataTypes.STRING,
-        field: 'username'
+        field: 'username',
+        validate: { len: [3,64] }
     },
     email: {
         type: DataTypes.STRING,
-        validate: { isEmail: true } 
+        validate: { isEmail: true, len: [5,128] } 
     },
     password: DataTypes.STRING,
     createdAt: {
@@ -23,7 +24,10 @@ var User = sequelize.define('user', {
     }
 }, {
     classMethods: {
-        // TODO servers, storages & ip_addresses to here and user to each model
+        associate: models => {
+            User.hasMany(models.server, {as: 'servers'}),
+            User.hasMany(models.storage_device, {as: 'storages'})
+        }        
     },
     instanceMethods: {
         generateHash: function(password) {

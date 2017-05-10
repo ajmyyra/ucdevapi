@@ -1,5 +1,5 @@
 export default function (sequelize, DataTypes) {
-  return sequelize.define( 'ip_address', {
+  const IPAddr = sequelize.define( 'ip_address', {
     access: { 
         type: DataTypes.ENUM,
         values: [ 'public', 'private' ],
@@ -19,6 +19,12 @@ export default function (sequelize, DataTypes) {
         defaultValue: 'no'
     },
     ptr_record: { type: DataTypes.STRING, validate: { isFQDN: true } },
-    server: { type: DataTypes.STRING, validate: { isUUID: true } },
-  }
-)}
+  },{
+    classMethods: {
+        associate: (models) => {
+            IPAddr.belongsTo(models.server)
+        }
+    }
+  })
+  return IPAddr
+}

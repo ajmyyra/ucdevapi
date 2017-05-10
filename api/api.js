@@ -28,7 +28,7 @@ export function startServer() {
           })
           .catch ( (error) => {
             log.error("Error in registering user " + req.params.username + ": " + error);
-            res.statusCode =500;
+            res.statusCode = 500;
             res.end(JSON.stringify('{ success: false, message: "Error in registration. Please try again." }'));
           });
         } 
