@@ -8,6 +8,7 @@ export default function (sequelize, DataTypes) {
     },
     // backup_rule
     // backups
+    favorite: { type: DataTypes.BOOLEAN },
     license: { type: DataTypes.INTEGER },
     size: { type: DataTypes.INTEGER, validate: { min: 10, max: 1024 } },
     state: { type: DataTypes.STRING },
@@ -17,7 +18,10 @@ export default function (sequelize, DataTypes) {
         defaultValue: 'maxiops' 
     },
     title: { type: DataTypes.STRING, validate: { len: [0,64] } },
-    type: { type: DataTypes.STRING },
+    type: { 
+      type: DataTypes.ENUM,
+      values: [ 'normal', 'backup', 'cdrom', 'template' ]
+    },
     zone: { 
         type: DataTypes.ENUM,
         values: [ 'fi-hel1', 'uk-lon1', 'us-chi1', 'de-fra1', 'sg-sin1', 'ne-ams1' ]
