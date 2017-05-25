@@ -46,10 +46,11 @@ export default function (sequelize, DataTypes) {
     },
   },{
     classMethods: {
-      associate: (models) => {
-        Server.belongsToMany(models.storage_device, { as: 'storage_devices', through: 'ServerStorage'}),
-        Server.hasMany(models.ip_address, {as: 'ip_addresses'})
-    }}
+        associate: (models) => {
+            Server.belongsToMany(models.storage_device, { as: 'storage_devices', through: 'ServerStorage'}),
+            Server.hasMany(models.ip_address, {as: 'ip_addresses'})
+        }
+    }
   })
   return Server
 }
