@@ -130,6 +130,7 @@ export function startServer() {
   server.put('/ip_address/:ip', ipaddr.modify);
   server.del('/ip_address/:ip', ipaddr.delete);
 
+  // TODO firewall
 
   server.listen( process.env.PORT || 8080, process.env.IP || "0.0.0.0", () =>
     log.info( '%s server listening at %s', server.name, server.url )
