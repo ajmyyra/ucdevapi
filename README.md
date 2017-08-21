@@ -21,7 +21,7 @@ After cloning this repository, run 'npm install' no install the dependencies.
 Dev API uses MySQL to store the data, so you'll need a working database.
 
 You'll also need a config file at config/database.json including the configuration. Example can be found from config/database.json.example.
-```
+
 
 Same info is also needed at bin/setup-db.sh, with example at bin/setup-db.sh.example.
 
