@@ -10,7 +10,7 @@ pids
 *.pid.lock
 
 # configuration
-config/*
+config/database.json
 bin/setup-db.sh
 
 # node-waf configuration

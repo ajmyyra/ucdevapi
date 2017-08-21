@@ -1,38 +1,49 @@
-import models from '../models'
-import restify from 'restify'
-import bunyan from 'bunyan'
-import os from 'os'
+import models from '../models';
+import restify from 'restify';
+import bunyan from 'bunyan';
+import os from 'os';
 
-const log = bunyan.createLogger( { name: 'ucdevapi', level: 'DEBUG' } );
+const log = bunyan.createLogger({ 
+  name: 'ucdevapi', 
+  level: process.env.production ? 'info' : 'debug' 
+});
 var ipaddr = require('./ipaddr');
 var misc = require('./misc');
 var virtserver = require('./server');
 var storage = require('./storage');
 
 export function startServer() {
-  const server = restify.createServer();
+  const server = restify.createServer({
+    "name": "UpCloud Dev API",
+    "log": log
+  });
   server.use(restify.CORS());
   server.use(restify.acceptParser(server.acceptable));
   server.use(restify.bodyParser({ mapParams: true }));
   server.use(restify.authorizationParser());
 
-  server.post('/register', function(req, res, next) {
+  server.pre((req, res, next) => {
+    req.log.info({req: request}, 'start');
+    return next();
+  })
+
+  server.post('/register', (req, res, next) => {
     var newuser = models.user.build(req.params);
     const userpwd = newuser.generateHash(req.params.password);
     newuser.password = userpwd;
 
-    models.user.findAll({ // TODO promisify correctly to make prettier
-      where: { username: req.params.username },
-      logging: log.debug.bind(log) })
+    models.user.findAll({
+      where: { username: req.params.username }})
       .then( (user) => {
         if (!user || user.length < 1) {
           newuser.save()
           .then ( (createduser) => {
+            req.log.info(req.headers['x-forwarded-for'] || req.connection.remoteAddress, "User", createduser.username, "created!");
             res.statusCode = 201;
             res.end(JSON.stringify('{ success: true, message: "Registration successful." }'));
           })
           .catch ( (error) => {
-            log.error("Error in registering user " + req.params.username + ": " + error);
+            req.log.error("Error in registering user " + req.params.username + ": " + error);
             res.statusCode = 500;
             res.end(JSON.stringify('{ success: false, message: "Error in registration. Please try again." }'));
           });
@@ -52,21 +63,20 @@ export function startServer() {
   server.use(function authenticate(req, res, next) {
     if (req.authorization.scheme === "Basic") {
       models.user.findOne({
-        where: { username: req.authorization.basic.username },
-        logging: log.debug.bind(log) })
-        .then( (user) => {
-          if (req.authorization.basic.username === user.username && user.validPassword(req.authorization.basic.password)) {
-            log.debug("Request accepted from user " + user.username);
-            next();
-          }
-          else {
-            throw new Error("Wrong password.");
-          }
-        }).catch( (error) => {
-          log.error("Auth failed for user " + req.authorization.basic.username + ": " + error);
-          res.statusCode = 403;
-          res.json(JSON.parse('{ "error" : { "error_code" : "AUTHENTICATION_FAILED", "error_message" : "Authentication failed using the given username and password." } }'));
-        })
+        where: { username: req.authorization.basic.username } 
+      }).then( (user) => {
+        if (req.authorization.basic.username === user.username && user.validPassword(req.authorization.basic.password)) {
+          req.log.debug("Request accepted from user " + user.username);
+          next();
+        }
+        else {
+          throw new Error("Wrong password.");
+        }
+      }).catch( (error) => {
+        req.log.error("Auth failed for user " + req.authorization.basic.username + ": " + error);
+        res.statusCode = 403;
+        res.json(JSON.parse('{ "error" : { "error_code" : "AUTHENTICATION_FAILED", "error_message" : "Authentication failed using the given username and password." } }'));
+      })
     }
     else {
       log.error("No authentication header provided.");
@@ -77,7 +87,7 @@ export function startServer() {
   })
 
   // test route for debug
-  server.post('/foo', function(req, res, next) {
+  server.post('/foo', (req, res, next) => {
     console.log("Reached /foo");
     console.log(req.params);
   })
@@ -135,4 +145,6 @@ export function startServer() {
   server.listen( process.env.PORT || 8080, process.env.IP || "0.0.0.0", () =>
     log.info( '%s server listening at %s', server.name, server.url )
   )
+
+  server.on('after', restify.auditLogger({log: log}));
 }

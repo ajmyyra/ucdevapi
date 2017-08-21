@@ -17,11 +17,7 @@ var User = sequelize.define('user', {
         type: DataTypes.STRING,
         validate: { isEmail: true, len: [5,128] } 
     },
-    password: DataTypes.STRING,
-    createdAt: {
-        type: DataTypes.DATE,
-        default: DataTypes.NOW
-    }
+    password: DataTypes.STRING
 }, {
     classMethods: {
         associate: models => {

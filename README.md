@@ -20,39 +20,10 @@ After cloning this repository, run 'npm install' no install the dependencies.
 
 Dev API uses MySQL to store the data, so you'll need a working database.
 
-You'll also need a config file at config/sequelize.json including the configuration. You'll find an example below:
-
-```
-{
-  "development":  {
-    "username": "testuser",
-    "password": "testpwd",
-    "database": "testdatabase",
-    "host": "localhost",
-    "port": 3306,
-    "dialect": "mysql"
-  },
-  "production": {
-      "use_env_variable": true
-  }
-}
+You'll also need a config file at config/database.json including the configuration. Example can be found from config/database.json.example.
 ```
 
-Same info is also needed at bin/setup-db.sh, as this example shows:
-
-```
-#!/bin/bash
-BASEDIR=$(dirname ${BASH_SOURCE[0]})/.. 
-DB_NAME=testdatabase
-DB_USER=testuser
-DB_PASSWORD=testpwd
-DB_HOST=localhost
-
-DBCMD="CREATE DATABASE IF NOT EXISTS $DB_NAME;"
-mysql --user=$DB_USER --password=$DB_PASSWORD --host=$DB_HOST --execute="$DBCMD"
-
-babel-node $BASEDIR/bin/initdb.es6
-```
+Same info is also needed at bin/setup-db.sh, with example at bin/setup-db.sh.example.
 
 Once done, run 'npm '
 

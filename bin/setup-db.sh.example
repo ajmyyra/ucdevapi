@@ -1,0 +1,11 @@
+#!/bin/bash
+BASEDIR=$(dirname ${BASH_SOURCE[0]})/.. 
+DB_NAME=testdatabase
+DB_USER=testuser
+DB_PASSWORD=testpwd
+DB_HOST=localhost
+
+DBCMD="CREATE DATABASE IF NOT EXISTS $DB_NAME;"
+mysql --user=$DB_USER --password=$DB_PASSWORD --host=$DB_HOST --execute="$DBCMD"
+
+babel-node $BASEDIR/bin/initdb.es6
