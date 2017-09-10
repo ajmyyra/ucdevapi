@@ -1,19 +1,17 @@
 import models from '../models'
 import fs from 'fs'
 
-insertUsers()
-// This is needed as we need an IP pool:
-//insertIPAddresses()
-// If needed:
-//insertServers()
-//insertStorages()
+insertTestdata()
 
-
-async function insertUsers() {
-  await models.sequelize.sync( { force: true } )
-  const users = JSON.parse( fs.readFileSync('testdata/users.json','utf-8') )
+async function insertTestdata() {
+  await models.sequelize.sync({ force: true });
+  const users = JSON.parse( fs.readFileSync('testdata/users.json','utf-8') );
+  const plans = JSON.parse( fs.readFileSync('testdata/plans.json','utf-8') );
   for (const user of users) {
-    await models.user.create(user)
+    await models.user.create(user);
   }
-  models.sequelize.close()
+  for (const plan of plans) {
+    await models.plan.create(plan);
+  }
+  models.sequelize.close();
 }
