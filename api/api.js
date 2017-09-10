@@ -99,6 +99,7 @@ export function startServer() {
   server.get('/timezone', misc.timezones);
 
   // Server actions
+  server.get('/server_size', virtserver.serversizes);
   server.get('/server', virtserver.list);
   server.post('/server', virtserver.create);
   server.get('/server/:uuid', virtserver.info);
