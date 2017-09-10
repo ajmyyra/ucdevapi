@@ -34,7 +34,7 @@ export function startServer() {
 
     models.user.findAll({
       where: { username: req.params.username }})
-      .then( (user) => {
+      .then((user) => {
         if (!user || user.length < 1) {
           newuser.save()
           .then ( (createduser) => {
@@ -49,12 +49,12 @@ export function startServer() {
           });
         } 
         else {
-          log.info("User " + req.params.username + " already exists.");
+          req.log.info("User " + req.params.username + " already exists.");
           res.statusCode = 409;
           res.end(JSON.stringify('{ success: false, message: "Username is already taken. Try another." }'));
         }
       }).catch( (error) => {
-        log.error("Error in user lookup for user " + req.params.username + ": " + error);
+        req.log.error("Error in user lookup for user " + req.params.username + ": " + error);
         res.statusCode = 500;
         res.end(JSON.stringify('{ success: false, message: "Error in registration. Please try again." }'));
       });
@@ -79,7 +79,7 @@ export function startServer() {
       })
     }
     else {
-      log.error("No authentication header provided.");
+      req.log.error("No authentication header provided.");
       res.statusCode = 401;
       res.json(JSON.parse('{ "error" : { "error_code" : "AUTHENTICATION_FAILED", "error_message" : "The use of this dev API requires authentication. Create your account at /register." } }'));
     }
