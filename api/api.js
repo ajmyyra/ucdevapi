@@ -7,6 +7,7 @@ const log = bunyan.createLogger({
   name: 'ucdevapi', 
   level: process.env.production ? 'info' : 'debug' 
 });
+
 var ipaddr = require('./ipaddr');
 var misc = require('./misc');
 var virtserver = require('./server');
@@ -17,19 +18,20 @@ export function startServer() {
     "name": "UpCloud Dev API",
     "log": log
   });
-  server.use(restify.CORS());
-  server.use(restify.acceptParser(server.acceptable));
-  server.use(restify.bodyParser({ mapParams: true }));
-  server.use(restify.authorizationParser());
+  server.use(restify.plugins.acceptParser(server.acceptable));
+  server.use(restify.plugins.bodyParser({ mapParams: true }));
+  server.use(restify.plugins.queryParser({ mapParams: true }));
+  server.use(restify.plugins.authorizationParser());
 
   server.pre((req, res, next) => {
-    req.log.info({req: request}, 'start');
+    req.log.info({req: req}, 'start');
     return next();
   })
 
   server.post('/register', (req, res, next) => {
+    console.log(req.params); //debug
     var newuser = models.user.build(req.params);
-    const userpwd = newuser.generateHash(req.params.password);
+    const userpwd = newuser.generatePassword(req.params.password);
     newuser.password = userpwd;
 
     models.user.findAll({
@@ -147,5 +149,4 @@ export function startServer() {
     log.info( '%s server listening at %s', server.name, server.url )
   )
 
-  server.on('after', restify.auditLogger({log: log}));
 }
