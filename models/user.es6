@@ -24,14 +24,15 @@ module.exports = function(sequelize, DataTypes) {
         User.hasMany(models.server, {as: 'servers'});
         User.hasMany(models.storage_device, {as: 'storages'});
     };
+
     User.prototype.generatePassword = (password) => {
-        console.log(password); //debug
         var salt = bcrypt.genSaltSync(10); 
         var hash = bcrypt.hashSync(password, salt);
         return hash;
     };
-    User.prototype.validPassword = (password) => {
-        return bcrypt.compareSync(password, this.password);
+
+    User.prototype.validPassword = (password, userpassword) => {
+        return bcrypt.compareSync(password, userpassword);
     };
 
     return User;

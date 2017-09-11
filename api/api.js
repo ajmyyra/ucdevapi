@@ -29,7 +29,12 @@ export function startServer() {
   })
 
   server.post('/register', (req, res, next) => {
-    console.log(req.params); //debug
+    if (!req.params.username || !req.params.password || !req.params.email) {
+      req.log.error("Error in registering user, username or password missing ");
+      res.statusCode = 400;
+      res.end(JSON.stringify('{ success: false, message: "Error in registration. Username, password or email not provided." }'));
+    }
+    
     var newuser = models.user.build(req.params);
     const userpwd = newuser.generatePassword(req.params.password);
     newuser.password = userpwd;
@@ -39,26 +44,32 @@ export function startServer() {
       .then((user) => {
         if (!user || user.length < 1) {
           newuser.save()
-          .then ( (createduser) => {
+          .then ((createduser) => {
             req.log.info(req.headers['x-forwarded-for'] || req.connection.remoteAddress, "User", createduser.username, "created!");
             res.statusCode = 201;
             res.end(JSON.stringify('{ success: true, message: "Registration successful." }'));
           })
-          .catch ( (error) => {
+          .catch ((error) => {
             req.log.error("Error in registering user " + req.params.username + ": " + error);
             res.statusCode = 500;
-            res.end(JSON.stringify('{ success: false, message: "Error in registration. Please try again." }'));
+            var status;
+            status.success = false;
+            status.message = "Error in registration. Please try again later.";
+            res.json(status);
           });
         } 
         else {
           req.log.info("User " + req.params.username + " already exists.");
           res.statusCode = 409;
-          res.end(JSON.stringify('{ success: false, message: "Username is already taken. Try another." }'));
+          var status = {};
+          status.success = false;
+          status.message = "Username is already taken. Try another.";
+          res.json(status);
         }
       }).catch( (error) => {
         req.log.error("Error in user lookup for user " + req.params.username + ": " + error);
         res.statusCode = 500;
-        res.end(JSON.stringify('{ success: false, message: "Error in registration. Please try again." }'));
+        res.end(JSON.stringify('{ success: false, message: "Error in registration. Please try again later." }'));
       });
   })
 
@@ -66,15 +77,15 @@ export function startServer() {
     if (req.authorization.scheme === "Basic") {
       models.user.findOne({
         where: { username: req.authorization.basic.username } 
-      }).then( (user) => {
-        if (req.authorization.basic.username === user.username && user.validPassword(req.authorization.basic.password)) {
+      }).then((user) => {
+        if (req.authorization.basic.username === user.username && user.validPassword(req.authorization.basic.password, user.password)) {
           req.log.debug("Request accepted from user " + user.username);
           next();
         }
         else {
           throw new Error("Wrong password.");
         }
-      }).catch( (error) => {
+      }).catch((error) => {
         req.log.error("Auth failed for user " + req.authorization.basic.username + ": " + error);
         res.statusCode = 403;
         res.json(JSON.parse('{ "error" : { "error_code" : "AUTHENTICATION_FAILED", "error_message" : "Authentication failed using the given username and password." } }'));

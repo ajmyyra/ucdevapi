@@ -4,21 +4,23 @@ const defaults = JSON.parse(fs.readFileSync('api/defaults.json', 'utf8'));
 
 //   server.get('/server_size, virtserver.serversizes);
 exports.serversizes = (req, res) => {
-    var sizes = new JSONArray();
+    var sizes = [];
     for (var cores = 1; cores <= defaults.max_cores; cores++) {
         for (var mem = 512; mem <= defaults.max_memory; mem += 512) {
-            var sizeobj = new JSONObject();
-            sizeobj.put("core_number", cores);
-            sizeobj.put("memory_amount", mem);
-            sizes.put(sizeobj);
+            var sizeobj = {};
+            sizeobj["core_number"] = cores;
+            sizeobj["memory_amount"] = mem;
+
+            sizes.push(sizeobj);
         }
     }
 
-    var sizeobj = new JSONObject();
-    sizeobj.put("server_sizes", (new JSONObject).put("server_size", sizes));
+    var sizeresponse = {};
+    sizeresponse['server_sizes'] = {};
+    sizeresponse['server_sizes']['server_size'] = sizes;
 
     res.statusCode = 200;
-    res.JSON(sizeobj);
+    res.json(sizeresponse);
 }
 
 //   server.get('/server', virtserver.list);
