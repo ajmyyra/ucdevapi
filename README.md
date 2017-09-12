@@ -1,12 +1,12 @@
 # UpCloud development API
 
-As UpCloud doesn't have dev API of their own and I don't want to DoS them when developing something, I've created my own based on UpCloud API docs and some tests with the production API.
+As UpCloud doesn't have a dev API of their own and I don't want to DoS them when developing something, I've created my own based on UpCloud API docs and some tests with the production API.
 
 If you find anything not working the same way as the actual API does, please report an issue, or even better, send a PR.
 
 ## Current status
 
-This repository is in current development and features are added. Currently nothing works.
+This repository is in current development and features are added. Currently only static features work.
 
 Current goal is a basic CRUD setup for servers, storages and IP addresses. Long-term plan is to support the whole API (firewall, backups, subaccounts etc), but as my time is limited, we're not getting there anytime soon. If you need a specific feature of the API, create an issue and I'll try to prioritise it.
 
