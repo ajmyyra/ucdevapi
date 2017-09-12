@@ -19,12 +19,11 @@ export default function (sequelize, DataTypes) {
         defaultValue: 'no'
     },
     ptr_record: { type: DataTypes.STRING, validate: { isFQDN: true } },
-  },{
-    classMethods: {
-        associate: (models) => {
-            IPAddr.belongsTo(models.server)
-        }
-    }
-  })
-  return IPAddr
+  });
+  
+  IPAddr.associate = (models) => {
+    IPAddr.belongsTo(models.server);
+  };
+
+  return IPAddr;
 }

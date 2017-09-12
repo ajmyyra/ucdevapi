@@ -26,11 +26,11 @@ export default function (sequelize, DataTypes) {
         type: DataTypes.ENUM,
         values: [ 'fi-hel1', 'uk-lon1', 'us-chi1', 'de-fra1', 'sg-sin1', 'ne-ams1' ]
     }
-  },{
-    classMethods: {
-      associate: (models) => {
-        Storage.belongsToMany(models.server, { as: 'servers', through: 'ServerStorage'})
-    }}
-  })
-  return Storage
+  });
+
+  Storage.associate = (models) => {
+    Storage.belongsToMany(models.server, {as: 'servers', through: 'ServerStorage'});
+  };
+
+  return Storage;
 }

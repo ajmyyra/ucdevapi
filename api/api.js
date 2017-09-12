@@ -99,12 +99,6 @@ export function startServer() {
     
   })
 
-  // test route for debug
-  server.post('/foo', (req, res, next) => {
-    console.log("Reached /foo");
-    console.log(req.params);
-  })
-
   // Plan, zone and timezone actions
 
   server.get('/plan', misc.plans);
