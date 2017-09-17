@@ -10,23 +10,35 @@ module.exports = function(sequelize, DataTypes) {
     // TODO backup_rule as own model
     // TODO backups as storage models
     favorite: { type: DataTypes.BOOLEAN, defaultValue: false },
-    license: { type: DataTypes.INTEGER, defaultValue: false },
+    license: { 
+      type: DataTypes.INTEGER, 
+      defaultValue: 0,
+      validate: { isIn: [[ 0, 1 ]] }
+    },
     size: { type: DataTypes.INTEGER, validate: { min: 10, max: 2048 } },
-    state: { type: DataTypes.STRING, defaultValue: 'online' },
+    state: { 
+      type: DataTypes.ENUM,
+      values: [ 'online', 'maintenance', 'cloning', 'backuping', 'error' ],
+      defaultValue: 'online',
+      validate: { isIn: [['online', 'maintenance', 'cloning', 'backuping', 'error']] }
+    },
     tier: { 
         type: DataTypes.ENUM,
         values: [ 'hdd', 'maxiops' ],
-        defaultValue: 'maxiops' 
+        defaultValue: 'maxiops',
+        validate: { isIn: [['hdd', 'maxiops']] }
     },
     title: { type: DataTypes.STRING, validate: { len: [0,64] } },
     type: { 
       type: DataTypes.ENUM,
       values: [ 'normal', 'backup', 'cdrom', 'template' ],
-      defaultValue: 'normal'
+      defaultValue: 'normal',
+      validate: { isIn: [['normal', 'backup', 'cdrom', 'template']] }
     },
     zone: { 
         type: DataTypes.ENUM,
-        values: [ 'fi-hel1', 'uk-lon1', 'us-chi1', 'de-fra1', 'sg-sin1', 'ne-ams1' ]
+        values: [ 'fi-hel1', 'uk-lon1', 'us-chi1', 'de-fra1', 'sg-sin1', 'ne-ams1' ],
+        validate: { isIn: [['fi-hel1', 'uk-lon1', 'us-chi1', 'de-fra1', 'sg-sin1', 'ne-ams1']] }
     }
   });
 

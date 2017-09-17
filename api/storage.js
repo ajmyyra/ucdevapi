@@ -4,6 +4,29 @@ import models from '../models';
 const uuid = require('uuid/v4');
 const errors = JSON.parse(fs.readFileSync('api/errors.json', 'utf8'));
 
+const removeInternals = (storage, detailed) => {
+    var pubStorage = {};
+    pubStorage.access = storage.access;
+    pubStorage.license = storage.license;
+    pubStorage.size = storage.size;
+    pubStorage.state = storage.state;
+    pubStorage.tier = storage.tier;
+    pubStorage.title = storage.title;
+    pubStorage.type = storage.type;
+    pubStorage.uuid = storage.uuid;
+    pubStorage.zone = storage.zone;
+
+    if (detailed) {
+        pubStorage.servers = {};
+        pubStorage.servers.server = [];
+        // TODO populate server array from database
+        // TODO pubStorage.backup_rule
+    }
+    
+    return pubStorage;
+}
+exports.removeInternals = removeInternals;
+
 //   server.get('/storage', storage.list);
 //   server.get('/storage/public', storage.list);
 //   server.get('/storage/private', storage.list);
@@ -13,15 +36,65 @@ const errors = JSON.parse(fs.readFileSync('api/errors.json', 'utf8'));
 //   server.get('/storage/template', storage.list);
 //   server.get('/storage/favorite', storage.list);
 exports.list = (req, res) => {
-    req.log.info(req.params); //debug
-    res.statusCode = 501;
-    res.end();
+
+    var searchopts = {};
+    searchopts.userAnnotationId = req.user.annotation_id;
+    
+    const urlparts = req.url.split('/');
+    if (urlparts.length > 2) {
+        switch(urlparts[2]) {
+            case 'public':
+                searchopts.access = 'public';
+                break;
+            case 'private':
+                searchopts.access = 'private';
+                break;
+            case 'normal':
+                searchopts.type = 'normal';
+                break;
+            case 'backup':
+                searchopts.type = 'backup';
+                break;
+            case 'cdrom':
+                searchopts.type = 'cdrom';
+                break;
+            case 'template':
+                searchopts.type = 'template';
+                break;
+            case 'favorite':
+                searchopts.favorite = true;
+            default:
+                break;
+        }
+    }
+
+    models.storage_device.findAll({
+        where: searchopts 
+    }).then((storages) => {
+        var storageresp = {};
+        storageresp.storages = {};
+        storageresp.storages.storage = [];
+
+        storages.forEach((s) => {
+            storageresp.storages.storage.push(removeInternals(s, false));
+        });
+
+        res.statusCode = 200;
+        res.json(storageresp);
+
+    }).catch((err) => {
+        req.log.error('Error when fetching storages', err);
+        res.statusCode = 500;
+        res.end();
+    })
+    
 }
 
 //   server.post('/storage', storage.create);
 exports.create = (req, res) => {
     var newstorage = models.storage_device.build(req.params.storage);
     newstorage.uuid = uuid();
+    newstorage.userAnnotationId = req.user.annotation_id;
     newstorage.validate()
     .then(() => {
         newstorage.save()
@@ -41,8 +114,7 @@ exports.create = (req, res) => {
             res.statusCode = 500;
             res.end();
         });
-    })
-    .catch((valerr) => {
+    }).catch((valerr) => {
         const reason = valerr.errors[0].path;
         res.statusCode = 400;
         var errorresp = {};
@@ -61,20 +133,37 @@ exports.create = (req, res) => {
                 errorresp.error = errors['ZONE_INVALID'];
                 break;
             default:
-                errorobj.error_code = "UNKNOWN_ERROR";
+                errorresp.error = errors['UNKNOWN_ERROR'];
                 req.log.debug('Unknown validation error:', valerr.errors[0]);
                 break;
         }
 
         res.json(errorresp);
-    })
+    });
     
 }
 
 //   server.get('/storage/:uuid', storage.info);
 exports.info = (req, res) => {
-    res.statusCode = 501;
-    res.end();
+    models.storage_device.findOne({
+        where: { 
+            uuid: req.params.uuid,
+            userAnnotationId: req.user.annotation_id
+        }
+    }).then((storage) => {
+        if (!storage || storage.length < 1) {
+            res.statusCode = 404;
+            res.end();
+        }
+        else {
+            res.statusCode = 200;
+            res.json(removeInternals(storage, true));
+        }     
+    }).catch((err) => {
+        req.log.error('Problem when fetching event:', err);
+        res.statusCode = 500;
+        res.end();
+    });
 }
 
 //   server.put('/storage/:uuid', storage.modify);
