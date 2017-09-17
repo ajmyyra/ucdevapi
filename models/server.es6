@@ -1,4 +1,5 @@
-export default function (sequelize, DataTypes) {
+module.exports = function(sequelize, DataTypes) {
+    
     const Server = sequelize.define('server', {
         uuid: { type: DataTypes.STRING, unique: true, validate: { isUUID: 4 } },
         boot_order: { 

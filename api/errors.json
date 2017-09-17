@@ -1,1 +1,26 @@
-// TODO refactor all UpCloud API errors here
+{
+    "BACKUP_RULE_INVALID": {
+        "error_code": "BACKUP_RULE_INVALID",
+        "error_message": "The backup_rule block has an invalid value."
+    },
+    "SIZE_INVALID": {
+        "error_code": "SIZE_INVALID",
+        "error_message": "The attribute size has an invalid value."
+    },
+    "TIER_INVALID": {
+        "error_code": "TIER_INVALID",
+        "error_message": "The attribute tier has an invalid value."
+    },
+    "TITLE_INVALID": {
+        "error_code": "TITLE_INVALID",
+        "error_message": "The attribute title has an invalid value."
+    },
+    "ZONE_INVALID": {
+        "error_code": "ZONE_INVALID",
+        "error_message": "The attribute zone has an invalid value."
+    },
+    "UNKNOWN_ERROR": {
+        "error_code": "UNKNOWN_ERROR",
+        "error_message": "We really have no clue. Debug log will reveal more."
+    }
+}

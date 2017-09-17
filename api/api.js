@@ -5,7 +5,7 @@ import os from 'os';
 
 const log = bunyan.createLogger({ 
   name: 'ucdevapi', 
-  level: process.env.production ? 'info' : 'debug' 
+  level: process.env.NODE_ENV == 'production' ? 'info' : 'debug' 
 });
 
 var ipaddr = require('./ipaddr');
@@ -29,10 +29,14 @@ export function startServer() {
   })
 
   server.post('/register', (req, res, next) => {
+    req.log.info("Registering attempt from", req.headers['x-forwarded-for'] || req.connection.remoteAddress);
+
     if (!req.params.username || !req.params.password || !req.params.email) {
       req.log.error("Error in registering user, username or password missing ");
       res.statusCode = 400;
-      res.end(JSON.stringify('{ success: false, message: "Error in registration. Username, password or email not provided." }'));
+      status.success = false;
+      status.message = "Error in registration. Username, password or email not provided.";
+      res.json(status);
     }
     
     var newuser = models.user.build(req.params);
@@ -45,14 +49,17 @@ export function startServer() {
         if (!user || user.length < 1) {
           newuser.save()
           .then ((createduser) => {
-            req.log.info(req.headers['x-forwarded-for'] || req.connection.remoteAddress, "User", createduser.username, "created!");
+            req.log.info("User", createduser.username, "created!");
             res.statusCode = 201;
-            res.end(JSON.stringify('{ success: true, message: "Registration successful." }'));
+            var status = {};
+            status.success = true;
+            status.message = "Registration successful.";
+            res.json(status);
           })
           .catch ((error) => {
             req.log.error("Error in registering user " + req.params.username + ": " + error);
             res.statusCode = 500;
-            var status;
+            var status = {};
             status.success = false;
             status.message = "Error in registration. Please try again later.";
             res.json(status);
@@ -74,12 +81,14 @@ export function startServer() {
   })
 
   server.use(function authenticate(req, res, next) {
+    req.log.info('Call for', req.url, 'from', req.headers['x-forwarded-for'] || req.connection.remoteAddress);
     if (req.authorization.scheme === "Basic") {
       models.user.findOne({
         where: { username: req.authorization.basic.username } 
       }).then((user) => {
         if (req.authorization.basic.username === user.username && user.validPassword(req.authorization.basic.password, user.password)) {
           req.log.debug("Request accepted from user " + user.username);
+          req.user = user;
           next();
         }
         else {
@@ -100,7 +109,6 @@ export function startServer() {
   })
 
   // Plan, zone and timezone actions
-
   server.get('/plan', misc.plans);
   server.get('/zone', misc.zones);
   server.get('/timezone', misc.timezones);

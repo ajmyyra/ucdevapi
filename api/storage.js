@@ -1,4 +1,8 @@
 // Routes for /storage
+var fs = require('fs');
+import models from '../models';
+const uuid = require('uuid/v4');
+const errors = JSON.parse(fs.readFileSync('api/errors.json', 'utf8'));
 
 //   server.get('/storage', storage.list);
 //   server.get('/storage/public', storage.list);
@@ -9,14 +13,62 @@
 //   server.get('/storage/template', storage.list);
 //   server.get('/storage/favorite', storage.list);
 exports.list = (req, res) => {
+    req.log.info(req.params); //debug
     res.statusCode = 501;
     res.end();
 }
 
 //   server.post('/storage', storage.create);
 exports.create = (req, res) => {
-    res.statusCode = 501;
-    res.end();
+    var newstorage = models.storage_device.build(req.params.storage);
+    newstorage.uuid = uuid();
+    newstorage.validate()
+    .then(() => {
+        newstorage.save()
+        .then((stor) => {
+            res.statusCode = 201;
+            var response = {};
+            response.storage = {};
+            response.storage.size = stor.size;
+            response.storage.tier = stor.tier;
+            response.storage.title = stor.title;
+            response.storage.zone = stor.zone;
+            // TODO backup_rule when implemented
+            res.json(response);
+        })
+        .catch((err) => {
+            req.log.error('Error when creating storage', err);
+            res.statusCode = 500;
+            res.end();
+        });
+    })
+    .catch((valerr) => {
+        const reason = valerr.errors[0].path;
+        res.statusCode = 400;
+        var errorresp = {};
+
+        switch (reason) {
+            case 'size':
+                errorresp.error = errors['SIZE_INVALID'];
+                break;
+            case 'title':
+                errorresp.error = errors['TITLE_INVALID'];
+                break;
+            case 'tier':
+                errorresp.error = errors['TIER_INVALID'];
+                break;
+            case 'zone':
+                errorresp.error = errors['ZONE_INVALID'];
+                break;
+            default:
+                errorobj.error_code = "UNKNOWN_ERROR";
+                req.log.debug('Unknown validation error:', valerr.errors[0]);
+                break;
+        }
+
+        res.json(errorresp);
+    })
+    
 }
 
 //   server.get('/storage/:uuid', storage.info);
