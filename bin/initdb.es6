@@ -1,13 +1,9 @@
 import models from '../models'
 import fs from 'fs'
 
-insertTestdata()
+initializeDatabase()
 
-async function insertTestdata() {
+async function initializeDatabase() {
   await models.sequelize.sync({ force: true });
-  const users = JSON.parse( fs.readFileSync('testdata/users.json','utf-8') );
-  for (const user of users) {
-    await models.user.create(user);
-  }
   models.sequelize.close();
 }

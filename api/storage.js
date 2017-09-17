@@ -7,6 +7,15 @@ const errors = JSON.parse(fs.readFileSync('api/errors.json', 'utf8'));
 const removeInternals = (storage, detailed) => {
     var pubStorage = {};
     pubStorage.access = storage.access;
+    if (detailed) {
+        pubStorage.backup_rule = "";
+        pubStorage.backups = {};
+        pubStorage.backups.backup = [];
+        // TODO actual backup_rule and listing of backups
+        pubStorage.servers = {};
+        pubStorage.servers.server = [];
+        // TODO populate server array from database
+    }
     pubStorage.license = storage.license;
     pubStorage.size = storage.size;
     pubStorage.state = storage.state;
@@ -16,13 +25,6 @@ const removeInternals = (storage, detailed) => {
     pubStorage.uuid = storage.uuid;
     pubStorage.zone = storage.zone;
 
-    if (detailed) {
-        pubStorage.servers = {};
-        pubStorage.servers.server = [];
-        // TODO populate server array from database
-        // TODO pubStorage.backup_rule
-    }
-    
     return pubStorage;
 }
 exports.removeInternals = removeInternals;
@@ -106,7 +108,8 @@ exports.create = (req, res) => {
             response.storage.tier = stor.tier;
             response.storage.title = stor.title;
             response.storage.zone = stor.zone;
-            // TODO backup_rule when implemented
+            // TODO actual backup_rule when implemented
+
             res.json(response);
         })
         .catch((err) => {
@@ -168,8 +171,28 @@ exports.info = (req, res) => {
 
 //   server.put('/storage/:uuid', storage.modify);
 exports.modify = (req, res) => {
-    res.statusCode = 501;
-    res.end();
+    models.storage_device.findOne({
+        where: { 
+            uuid: req.params.uuid,
+            userAnnotationId: req.user.annotation_id
+        }
+    }).then((storage) => {
+        if (!storage || storage.length < 1) {
+            res.statusCode = 404;
+            res.end();
+        }
+        else {
+            var error = {};
+            if (storage.type != 'normal') {
+                error.error = errors['STORAGE_TYPE_ILLEGAL'];
+            }
+            // TODO muokkaa ja tallenna
+        }     
+    }).catch((err) => {
+        req.log.error('Problem when fetching event:', err);
+        res.statusCode = 500;
+        res.end();
+    });
 }
 
 //   server.del('/storage/:uuid', storage.delete);
