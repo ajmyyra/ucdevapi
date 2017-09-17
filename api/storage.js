@@ -3,6 +3,7 @@ var fs = require('fs');
 import models from '../models';
 const uuid = require('uuid/v4');
 const errors = JSON.parse(fs.readFileSync('api/errors.json', 'utf8'));
+const defaults = JSON.parse(fs.readFileSync('api/defaults.json', 'utf8'));
 
 const removeInternals = (storage, detailed) => {
     var pubStorage = {};
@@ -82,7 +83,7 @@ exports.list = (req, res) => {
         });
 
         res.statusCode = 200;
-        res.json(storageresp);
+        res.json(storageresp).end();
 
     }).catch((err) => {
         req.log.error('Error when fetching storages', err);
@@ -110,7 +111,7 @@ exports.create = (req, res) => {
             response.storage.zone = stor.zone;
             // TODO actual backup_rule when implemented
 
-            res.json(response);
+            res.json(response).end();
         })
         .catch((err) => {
             req.log.error('Error when creating storage', err);
@@ -141,7 +142,7 @@ exports.create = (req, res) => {
                 break;
         }
 
-        res.json(errorresp);
+        res.json(errorresp).end();
     });
     
 }
@@ -155,12 +156,14 @@ exports.info = (req, res) => {
         }
     }).then((storage) => {
         if (!storage || storage.length < 1) {
+            var error = {};
+            error.error = errors['STORAGE_NOT_FOUND'];
             res.statusCode = 404;
-            res.end();
+            res.json(error).end();
         }
         else {
             res.statusCode = 200;
-            res.json(removeInternals(storage, true));
+            res.json(removeInternals(storage, true)).end();
         }     
     }).catch((err) => {
         req.log.error('Problem when fetching event:', err);
@@ -178,15 +181,71 @@ exports.modify = (req, res) => {
         }
     }).then((storage) => {
         if (!storage || storage.length < 1) {
+            var error = {};
+            error.error = errors['STORAGE_NOT_FOUND'];
             res.statusCode = 404;
-            res.end();
+            res.json(error).end();
         }
         else {
             var error = {};
             if (storage.type != 'normal') {
                 error.error = errors['STORAGE_TYPE_ILLEGAL'];
+                res.statusCode = 409;
+                res.json(error).end();
             }
-            // TODO muokkaa ja tallenna
+            if (storage.state != 'online') {
+                error.error = errors['STORAGE_STATE_ILLEGAL'];
+                res.statusCode = 409;
+                res.json(error).end();
+            }
+            // TODO check if attached to a running server (or just to a server? check!)
+            if (!req.params.storage) {
+                error.error = errors['STORAGE_INVALID'];
+                res.statusCode = 400;
+                res.json(error).end();
+            }
+
+            var changes = {};
+            if (req.params.storage.size) {
+                if (req.params.storage.size > defaults.max_storage_size || req.params.storage.size < storage.size) {
+                    error.error = errors['SIZE_INVALID'];
+                    res.statusCode = 400;
+                    res.json(error).end();
+                }
+                else {
+                    changes.size = req.params.storage.size;
+                }
+            }
+            if (req.params.storage.title) {
+                if (req.params.storage.title.length > defaults.max_storage_name_length) {
+                    error.error = errors['TITLE_INVALID'];
+                    res.statusCode = 400;
+                    res.json(error).end();
+                }
+                else {
+                    changes.title = req.params.storage.title;
+                }
+            }
+            // TODO backup_rule when implemented
+
+            if (JSON.stringify(changes) != JSON.stringify({}) && JSON.stringify(error) === JSON.stringify({})) {
+                storage.updateAttributes(changes)
+                .then((changed) => {
+                    res.statusCode = 202;
+                    res.json(removeInternals(changed, true)).end();
+                }).catch((err) => {
+                    req.log.error('Problem when changing storage attributes:', err);
+                    res.statusCode = 500;
+                    res.end();
+                });
+            }
+            else {
+                if (JSON.stringify(error) === JSON.stringify({})) {
+                    error.error = errors['STORAGE_INVALID'];
+                    res.statusCode = 400;
+                    res.json(error).end();
+                }
+            }
         }     
     }).catch((err) => {
         req.log.error('Problem when fetching event:', err);
@@ -197,8 +256,46 @@ exports.modify = (req, res) => {
 
 //   server.del('/storage/:uuid', storage.delete);
 exports.delete = (req, res) => {
-    res.statusCode = 501;
-    res.end();
+    models.storage_device.findOne({
+        where: { 
+            uuid: req.params.uuid,
+            userAnnotationId: req.user.annotation_id
+        }
+    }).then((storage) => {
+        if (!storage || storage.length < 1) {
+            var error = {};
+            error.error = errors['STORAGE_NOT_FOUND'];
+            res.statusCode = 404;
+            res.json(error).end();
+        }
+        else {
+            var error = {};
+            if (storage.state != 'online') {
+                error.error = errors['STORAGE_STATE_ILLEGAL'];
+                res.statusCode = 409;
+            }
+            // TODO check if attached to server
+
+            if (JSON.stringify(error) != JSON.stringify({})) {
+                res.json(error).end();
+            }
+            else {
+                storage.destroy()
+                .then(() => {
+                    res.statusCode = 204;
+                    res.end();
+                }).catch((err) => {
+                    req.log.error('Problem deleting storage:', err);
+                    res.statusCode = 500;
+                    res.end();
+                })
+            }
+        }
+    }).catch((err) => {
+        req.log.error('Problem when fetching storage for deletion:', err);
+        res.statusCode = 500;
+        res.end();
+    });
 }
 
 //   server.post('/storage/:uuid/clone', storage.clone);

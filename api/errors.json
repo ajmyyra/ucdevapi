@@ -15,13 +15,25 @@
         "error_code": "TITLE_INVALID",
         "error_message": "The attribute title has an invalid value."
     },
+    "STORAGE_STATE_ILLEGAL": {
+        "error_code": "STORAGE_STATE_ILLEGAL",
+        "error_message": "The storage is in a state in which it cannot be used. See Storage states."
+    },
     "ZONE_INVALID": {
         "error_code": "ZONE_INVALID",
         "error_message": "The attribute zone has an invalid value."
     },
+    "STORAGE_INVALID": {
+        "error_code": "STORAGE_INVALID",
+        "error_message": "The attribute storage has an invalid value."
+    },
     "STORAGE_TYPE_ILLEGAL": {
         "error_code": "STORAGE_TYPE_ILLEGAL",
         "error_message": "The type of the storage to be attached is illegal. Only storages of type normal can be resized. See Storage types."
+    },
+    "STORAGE_NOT_FOUND": {
+        "error_code": "STORAGE_NOT_FOUND",
+        "error_message": "The storage does not exist."
     },
     "UNKNOWN_ERROR": {
         "error_code": "UNKNOWN_ERROR",

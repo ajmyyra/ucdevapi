@@ -1,4 +1,6 @@
 {
     "max_cores": 20,
-    "max_memory": 131072
+    "max_memory": 131072,
+    "max_storage_size": 2048,
+    "max_storage_name_length": 64
 }
