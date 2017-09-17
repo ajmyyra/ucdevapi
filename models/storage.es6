@@ -11,7 +11,7 @@ module.exports = function(sequelize, DataTypes) {
     // TODO backups as storage models
     favorite: { type: DataTypes.BOOLEAN, defaultValue: false },
     license: { type: DataTypes.INTEGER, defaultValue: false },
-    size: { type: DataTypes.INTEGER, validate: { min: 10, max: 1024 } },
+    size: { type: DataTypes.INTEGER, validate: { min: 10, max: 2048 } },
     state: { type: DataTypes.STRING, defaultValue: 'online' },
     tier: { 
         type: DataTypes.ENUM,
