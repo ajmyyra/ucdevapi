@@ -1,5 +1,5 @@
 // Routes for /storage
-var fs = require('fs');
+import fs from 'fs';
 import models from '../../models';
 const uuid = require('uuid/v4');
 const errors = JSON.parse(fs.readFileSync('api/static/errors.json', 'utf8'));

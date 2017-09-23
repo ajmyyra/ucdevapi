@@ -1,5 +1,8 @@
 // Routes for /server
-var fs = require('fs');
+import fs from 'fs';
+import models from '../../models';
+const uuid = require('uuid/v4');
+const errors = JSON.parse(fs.readFileSync('api/static/errors.json', 'utf8'));
 const defaults = JSON.parse(fs.readFileSync('api/defaults.json', 'utf8'));
 
 //   server.get('/server_size, virtserver.serversizes);
@@ -20,7 +23,7 @@ exports.serversizes = (req, res) => {
     sizeresponse['server_sizes']['server_size'] = sizes;
 
     res.statusCode = 200;
-    res.json(sizeresponse);
+    res.json(sizeresponse).end();
 }
 
 //   server.get('/server', virtserver.list);
