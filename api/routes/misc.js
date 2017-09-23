@@ -1,8 +1,8 @@
 // Routes for /plan, /zone and /timezone
 var fs = require('fs');
-const plans = JSON.parse(fs.readFileSync('api/plans.json', 'utf8'));
-const zones = JSON.parse(fs.readFileSync('api/zones.json', 'utf8'));
-const timezones = JSON.parse(fs.readFileSync('api/timezones.json', 'utf8'));
+const plans = JSON.parse(fs.readFileSync('api/static/plans.json', 'utf8'));
+const zones = JSON.parse(fs.readFileSync('api/static/zones.json', 'utf8'));
+const timezones = JSON.parse(fs.readFileSync('api/static/timezones.json', 'utf8'));
 
 //   server.get('/plan', misc.plans);
 exports.plans = (req, res) => {

@@ -2,16 +2,18 @@ import models from '../models';
 import restify from 'restify';
 import bunyan from 'bunyan';
 import os from 'os';
+import fs from 'fs';
 
 const log = bunyan.createLogger({ 
   name: 'ucdevapi', 
   level: process.env.NODE_ENV == 'production' ? 'info' : 'debug' 
 });
+const errors = JSON.parse(fs.readFileSync('api/static/errors.json', 'utf8'));
 
-var ipaddr = require('./ipaddr');
-var misc = require('./misc');
-var virtserver = require('./server');
-var storage = require('./storage');
+var ipaddr = require('./routes/ipaddr');
+var misc = require('./routes/misc');
+var virtserver = require('./routes/server');
+var storage = require('./routes/storage');
 
 export function startServer() {
   const server = restify.createServer({

@@ -1,8 +1,8 @@
 // Routes for /storage
 var fs = require('fs');
-import models from '../models';
+import models from '../../models';
 const uuid = require('uuid/v4');
-const errors = JSON.parse(fs.readFileSync('api/errors.json', 'utf8'));
+const errors = JSON.parse(fs.readFileSync('api/static/errors.json', 'utf8'));
 const defaults = JSON.parse(fs.readFileSync('api/defaults.json', 'utf8'));
 
 const removeInternals = (storage, detailed) => {
