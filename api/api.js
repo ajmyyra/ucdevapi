@@ -26,7 +26,7 @@ export function startServer() {
   server.use(restify.plugins.authorizationParser());
 
   server.pre((req, res, next) => {
-    req.log.info({req: req}, 'start');
+    //req.log.info({req: req}, 'start'); // for query debugging
     return next();
   })
 
@@ -36,9 +36,10 @@ export function startServer() {
     if (!req.params.username || !req.params.password || !req.params.email) {
       req.log.error("Error in registering user, username or password missing ");
       res.statusCode = 400;
+      var status = {};
       status.success = false;
       status.message = "Error in registration. Username, password or email not provided.";
-      res.json(status);
+      res.json(status).end();
     }
     
     var newuser = models.user.build(req.params);

@@ -27,6 +27,14 @@
         "error_code": "STORAGE_INVALID",
         "error_message": "The attribute storage has an invalid value."
     },
+    "STORAGE_DEVICE_LIMIT_REACHED": {
+        "error_code": "STORAGE_DEVICE_LIMIT_REACHED",
+        "error_message": "The request contained more than four storage_device blocks."
+    },
+    "STORAGE_DEVICES_MISSING": {
+        "error_code": "STORAGE_DEVICES_MISSING",
+        "error_message": "The storage_devices block is missing from the request."
+    },
     "STORAGE_TYPE_ILLEGAL": {
         "error_code": "STORAGE_TYPE_ILLEGAL",
         "error_message": "The type of the storage to be attached is illegal. Only storages of type normal can be resized. See Storage types."

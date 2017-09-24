@@ -34,6 +34,36 @@ exports.list = (req, res) => {
 
 //   server.post('/server', virtserver.create);
 exports.create = (req, res) => {
+    var newserver = models.server.build(req.params.server);
+    newserver.uuid = uuid();
+    newserver.validate()
+    .then(() => {
+        req.log.debug(newserver); //debug
+        var error = {};
+        const storages = req.params.server.storage_devices.storage_device;
+        req.log.debug(storages); //debug
+    
+        if (storages.length < 1) {
+            error.error = errors['STORAGE_DEVICES_MISSING'];
+            res.statusCode = 400;
+        }
+        if (storages.length > 4) {
+            error.error = errors['STORAGE_DEVICE_LIMIT_REACHED'];
+            res.statusCode = 409;
+        }
+    
+        if (JSON.stringify(error) != JSON.stringify({})) {
+            res.json(error).end();
+        }
+        else {
+    
+        }
+    }).catch((valerr) => { // FIX hostname validation fails
+        req.log.debug(valerr);
+        const reason = valerr.errors[0].path;
+        req.log.debug(reason);
+    });
+
     res.statusCode = 501;
     res.end();
 }
