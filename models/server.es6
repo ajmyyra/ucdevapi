@@ -13,7 +13,17 @@ module.exports = function(sequelize, DataTypes) {
             defaultValue: 'on' 
         },
         host: { type: DataTypes.INTEGER },
-        hostname: { type: DataTypes.STRING, validate: { isFQDN: true, len: [0,128] } },
+        hostname: { 
+            type: DataTypes.STRING, 
+            validate: { 
+                isFQDN: { 
+                    require_tld: true, 
+                    allow_underscores: false, 
+                    allow_trailing_dot: false 
+                }, 
+                len: [0,128] 
+            } 
+        },
         license: { type: DataTypes.INTEGER },
         memory_amount: { type: DataTypes.INTEGER },
         nic_model: { 
